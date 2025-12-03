@@ -10,10 +10,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation(kotlin("test"))
-
     implementation("org.mongodb:mongodb-driver-sync:5.0.0")
-    implementation("org.xerial:sqlite-jdbc:3.45.1.0")
 }
 
 tasks.test {
