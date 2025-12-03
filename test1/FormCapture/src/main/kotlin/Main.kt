@@ -5,7 +5,6 @@ import java.net.InetSocketAddress
 import java.time.LocalDate
 
 import com.mongodb.client.MongoClients
-import com.mongodb.client.MongoCollection
 import org.bson.Document
 
 
@@ -57,9 +56,27 @@ fun main() {
 
                 val newUser = User(name , surname , idNum , birthday)
 
+                //db connection
                 val mongoClient = MongoClients.create("mongodb://localhost:27017")
-            }
+                val database = mongoClient.getDatabase("User_Database")
+                val collection = database.getCollection("User")
 
+                //map and send
+                val doc = Document("name" , name)
+                    .append("surname" , surname)
+                    .append("idNum" , idNum)
+                    .append("birthday" , birthday)
+
+                collection.insertOne(doc)
+                mongoClient.close()
+
+                val postMsg = "User : " + name + " saved succesfully"
+                val postMsgByteArr = postMsg.toByteArray() //better for efficiency on very large debug prints
+                exchange.responseHeaders.add("Content-Type" , "text/html")
+                exchange.sendResponseHeaders(200 , postMsgByteArr.size.toLong())
+                exchange.responseBody.use{os -> os.write(postMsgByteArr)}
+                println(postMsg)
+            }
 
         }
         else{
