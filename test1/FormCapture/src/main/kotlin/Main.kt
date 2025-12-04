@@ -6,12 +6,19 @@ import java.time.LocalDate
 
 import com.mongodb.client.MongoClients
 import org.bson.Document
+import java.net.URLDecoder
+import java.time.format.DateTimeFormatter
 
 
 fun main() {
 
     //evesdrop on port 8000
     val server = HttpServer.create(InetSocketAddress(8000),0)
+
+    //db connection
+    val mongoClient = MongoClients.create("mongodb://localhost:27017")
+    val database = mongoClient.getDatabase("User_Database")
+    val collection = database.getCollection("User")
 
     //default route
     server.createContext("/") { exchange ->
@@ -31,44 +38,59 @@ fun main() {
         }
 //POST
         else if (exchange.requestMethod == "POST"){
-            //stream data to formData , segment into formparts
+
+            //stream data to formData , segment and parse
             val formData = exchange.requestBody.reader().readText()
             println("Caputred Form Data :" + formData)
             val formParts = formData.split('&')
 
-            //manual form parser
             val params = mutableMapOf<String , String>()
             for (part in formParts){
                 val keyValue = part.split('=')
                 params[keyValue[0]]=keyValue[1]
             }
 
-            //assign and scrub
+
+            //assign , set sentinal values
             val name = params["name"]?.replace('+' , ' ')?.ifBlank { "INVALID" } ?: "INVALID"
             val surname = params["surname"]?.replace('+' , ' ')?.ifBlank { "INVALID" } ?: "INVALID"
-            val idNum = params["id_number"]?.ifBlank { "INVALID" } ?: "0"
-            val birthday = LocalDate.parse(params["birthday"]?.ifBlank { "1900-01-01" } ?: "1900-01-01") //reformat date
-                //val dateList = birthdayTemp.split('-') //to strictly adhere to '/' ??
-                //val birthday = LocalDate.parse(dateList[2]+'/'+dateList[1]+'/'+dateList[0])//format as object //but dates are best in objects for db
+            val idNum = params["id_number"]?.ifBlank { "INVALID" } ?: "INVALID"
+            var birthday : LocalDate? = null
+                val tempBirthday = URLDecoder.decode(((params["birthday"])?.ifBlank { "INVALID" } ?: "INVALID") , "UTF-8")//nasty,not worth the extra line
+                val dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            println("Scrubbed Data : " + " " + name + " " + surname + " " + idNum + " " + tempBirthday)
 
-            //build user , connect and post to db
-            if ((idNum != "0") && (name != "INVALID") && (surname != "INVALID") && (birthday != LocalDate.parse("1900-01-01"))){
 
-                val newUser = User(name , surname , idNum , birthday)
+            //validate
+            var validData = true
+            var invalidReason = "All Data Data Checks PASSED!"
 
-                //db connection
-                val mongoClient = MongoClients.create("mongodb://localhost:27017")
-                val database = mongoClient.getDatabase("User_Database")
-                val collection = database.getCollection("User")
+            if ( (listOf(name , surname , idNum , tempBirthday).contains("INVALID")) ||
+                (idNum.length != 13) ||
+                (tempBirthday.count { it == '/' } != 2)) {
+                    validData = false
+                    invalidReason="Validation Failed Due to Sentinal INVALID"
+            }
 
-                //map and send
+            if (validData){
+                try {
+                    birthday = LocalDate.parse(tempBirthday , dateFormat)
+                }catch (e : Exception){
+                    validData = false
+                    invalidReason = "DATE : Correct Format , Invalid Values"
+                }
+            }
+
+            println(invalidReason)
+
+            //post to db
+            if (validData){
                 val doc = Document("name" , name)
                     .append("surname" , surname)
                     .append("idNum" , idNum)
                     .append("birthday" , birthday)
 
                 collection.insertOne(doc)
-                mongoClient.close()
 
                 val postMsg = "User : " + name + " saved succesfully"
                 val postMsgByteArr = postMsg.toByteArray() //better for efficiency on very large debug prints
