@@ -28,12 +28,19 @@ fun main() {
             if (exchange.requestURI.path == "/" || exchange.requestURI.path == "/index.html") { //prevent double log of filebytes
                 //read data from our index and store bytes
                 val inputStream = object {}.javaClass.getResourceAsStream("/index.html")
-                val fileBytes = inputStream.readBytes()
+                var pageContent = inputStream.bufferedReader().use { it.readText() }
+
+                //prevent tag display on initial visit
+                pageContent = pageContent.replace("{{error_msg}}", "")
+                pageContent = pageContent.replace("{{name}}", "")
+                pageContent = pageContent.replace("{{surname}}", "")
+                pageContent = pageContent.replace("{{id_number}}", "")
+                pageContent = pageContent.replace("{{birthday}}", "")
 
                 exchange.responseHeaders.add("Content-Type", "text/html")
-                exchange.sendResponseHeaders(200, fileBytes.size.toLong())
-                exchange.responseBody.use { os -> os.write(fileBytes) }
-                println("File Bytes :" + fileBytes)
+                exchange.sendResponseHeaders(200, pageContent.toByteArray().size.toLong())
+                exchange.responseBody.use { os -> os.write(pageContent.toByteArray()) }
+                println("\n\n ========== PAGE CONTENT ========== \n\n" + pageContent + "\n\n ========== END ========== \n\n")
             }
         }
 //POST
@@ -52,13 +59,13 @@ fun main() {
 
 
             //assign , set sentinal values
-            val name = params["name"]?.replace('+' , ' ')?.ifBlank { "INVALID" } ?: "INVALID"
-            val surname = params["surname"]?.replace('+' , ' ')?.ifBlank { "INVALID" } ?: "INVALID"
+            val name = URLDecoder.decode((params["name"]?.ifBlank { "INVALID" } ?: "INVALID"), "UTF-8").trim()
+            val surname = URLDecoder.decode((params["surname"]?.ifBlank { "INVALID" } ?: "INVALID"), "UTF-8").trim()
             val idNum = params["id_number"]?.ifBlank { "INVALID" } ?: "INVALID"
             var birthday : LocalDate? = null
-                val tempBirthday = URLDecoder.decode(((params["birthday"])?.ifBlank { "INVALID" } ?: "INVALID") , "UTF-8")//nasty,not worth the extra line
+                val tempBirthday = URLDecoder.decode(((params["birthday"])?.ifBlank { "INVALID" } ?: "INVALID") , "UTF-8")
                 val dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-            println("Scrubbed Data : " + " " + name + " " + surname + " " + idNum + " " + tempBirthday)
+            println("Scrubbed Data : " + name + " " + surname + " " + idNum + " " + tempBirthday)
 
 
             //validate
@@ -66,10 +73,13 @@ fun main() {
             var invalidReason = "All Data Data Checks PASSED!"
 
             if ( (listOf(name , surname , idNum , tempBirthday).contains("INVALID")) ||
+                (!name.matches(Regex("^[a-zA-Z\\s\\-']+$"))) ||
+                (!surname.matches(Regex("^[a-zA-Z\\s\\-']+$"))) ||
                 (idNum.length != 13) ||
+                (!idNum.all { it.isDigit() }) ||
                 (tempBirthday.count { it == '/' } != 2)) {
                     validData = false
-                    invalidReason="Validation Failed Due to Sentinal INVALID"
+                    invalidReason="Validation Failed Due to:  Invalid Values in ID/Name/Surname , Invalid ID length , or Invalid Date Format "
             }
 
             if (validData){
@@ -81,10 +91,21 @@ fun main() {
                 }
             }
 
+            if ( birthday.toString().replace("-" , "").substring(2,8).compareTo(idNum.take(6)) != 0 ) {//find alternative to abomination
+                validData = false
+                invalidReason = "Specified Birthday Does not Match ID Values"
+            }
+
+            if ( (collection.find(Document("idNum" , idNum)).first()) != null) {
+                validData = false
+                invalidReason = "User ID Already Exists"
+            }
+
             println(invalidReason)
 
-            //post to db
+            //verify unique and insert
             if (validData){
+
                 val doc = Document("name" , name)
                     .append("surname" , surname)
                     .append("idNum" , idNum)
@@ -98,11 +119,22 @@ fun main() {
                 exchange.sendResponseHeaders(200 , postMsgByteArr.size.toLong())
                 exchange.responseBody.use{os -> os.write(postMsgByteArr)}
                 println(postMsg)
+//Failed Post
+            }else{
+                val inputStream = object {}.javaClass.getResourceAsStream("/index.html")
+                var pageContent = inputStream.bufferedReader().use { it.readText() }
+                //insert error with reason
+                pageContent = pageContent.replace("{{error_msg}}", invalidReason)
+
+                pageContent = pageContent.replace("{{name}}", name)
+                pageContent = pageContent.replace("{{surname}}", surname)
+                pageContent = pageContent.replace("{{id_number}}", idNum)
+                pageContent = pageContent.replace("{{birthday}}", tempBirthday)
+
+                exchange.sendResponseHeaders(200, pageContent.length.toLong())
+                exchange.responseBody.use { os -> os.write(pageContent.toByteArray()) }
             }
 
-        }
-        else{
-            //error handle?
         }
     }
 
