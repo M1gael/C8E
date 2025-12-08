@@ -40,7 +40,7 @@ fun main() {
                 exchange.responseHeaders.add("Content-Type", "text/html")
                 exchange.sendResponseHeaders(200, pageContent.toByteArray().size.toLong())
                 exchange.responseBody.use { os -> os.write(pageContent.toByteArray()) }
-                println("\n\n ========== PAGE CONTENT ========== \n\n" + pageContent + "\n\n ========== END ========== \n\n")
+                println("\n\n ========== PAGE CONTENT ========== \n" + pageContent + "\n ==========  ==========")
             }
         }
 //POST
@@ -48,7 +48,7 @@ fun main() {
 
             //stream data to formData , segment and parse
             val formData = exchange.requestBody.reader().readText()
-            println("Caputred Form Data :" + formData)
+            println("\n\n========== Caputred Form Data ========== \n" + formData + "\n==========  ========== ")
             val formParts = formData.split('&')
 
             val params = mutableMapOf<String , String>()
@@ -59,13 +59,15 @@ fun main() {
 
 
             //assign , set sentinal values
-            val name = URLDecoder.decode((params["name"]?.ifBlank { "INVALID" } ?: "INVALID"), "UTF-8").trim()
-            val surname = URLDecoder.decode((params["surname"]?.ifBlank { "INVALID" } ?: "INVALID"), "UTF-8").trim()
-            val idNum = params["id_number"]?.ifBlank { "INVALID" } ?: "INVALID"
+            val name = URLDecoder.decode((params["name"]?.ifBlank { "INVALID" } ?: "INVALID"), "UTF-8").trim().replace( " " , "")
+            val surname = URLDecoder.decode((params["surname"]?.ifBlank { "INVALID" } ?: "INVALID"), "UTF-8").trim().replace( " " , "")
+            val idNum = URLDecoder.decode((params["id_number"]?.ifBlank { "INVALID" } ?: "INVALID"), "UTF-8").trim().replace( " " , "")
             var birthday : LocalDate? = null
-                val tempBirthday = URLDecoder.decode(((params["birthday"])?.ifBlank { "INVALID" } ?: "INVALID") , "UTF-8")
+                val tempBirthday = URLDecoder.decode(((params["birthday"])?.ifBlank { "INVALID" } ?: "INVALID") , "UTF-8").replace( " " , "")
                 val dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-            println("Scrubbed Data : " + name + " " + surname + " " + idNum + " " + tempBirthday)
+            println("\n\n========== Scrubbed Data ========== \n"
+                    + name + " " + surname + " " + idNum + " " + tempBirthday
+                    + "\n==========  ==========")
 
 
             //validate
@@ -91,6 +93,7 @@ fun main() {
                 }
             }
 
+            if ( (birthday != null) && validData )
             if ( birthday.toString().replace("-" , "").substring(2,8).compareTo(idNum.take(6)) != 0 ) {//find alternative to abomination
                 validData = false
                 invalidReason = "Specified Birthday Does not Match ID Values"
@@ -101,7 +104,9 @@ fun main() {
                 invalidReason = "User ID Already Exists"
             }
 
-            println(invalidReason)
+
+            println("\n\n ========== POST STATUS ========== \n" + invalidReason + "\n==========  ==========")
+
 
             //verify unique and insert
             if (validData){
