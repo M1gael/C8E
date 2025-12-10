@@ -2,6 +2,7 @@ package org.example
 
 import java.util.Scanner
 import kotlin.random.Random
+import java.sql.Connection
 
 fun main() {
 
@@ -21,13 +22,22 @@ fun main() {
     //program loop
     var again = true
     while (again){
+        println("\n\n\n========== START OF APPLICATION ==========\n")
         print("Provide the amount of records to generate : ")
         val recordCount = scanner.nextInt()
+        println("\n\n\n========== ==========\n")
+
 
         val records = HashSet<String>()
 
+        println("\n\n========== ADDING RECORDS ==========\n")
         while (records.size < recordCount){
             val name = names.random()
+            var initials = name[0].toString()
+                for( i in 0..name.length-2){
+                    if ( name[i].toString().equals(" ") == true )
+                initials = initials + name[i+1]
+            }
             val surname = surnames.random()
             val birthYear = Random.nextInt(1950 , 2026)
             val birthMonth = Random.nextInt(1 , 13)
@@ -47,16 +57,18 @@ fun main() {
                     }
                 }
             val birthDate = String.format("%02d/%02d/%d", birthDay, birthMonth, birthYear)
-            TODO()//add AGE and initial
+            val age = 2025 - birthYear
             //start building the entry list in mem
-            records.add( records.size.toString() + name + " " + surname + " " + birthDate)
+            records.add("$name,$surname,$initials,$age,$birthDate")
+            //println("RECORD ${records.size} : $name $surname $initials $age $birthDate")
         }
+        println("Generated ${records.size} Records. \nFinal Entry : ${records.last()}")
+        println("\n========== ==========\n")
 
         println("\n\n========== COMPLETED ==========\n")
-        print("Would you like to do another entry? (Y?)")
+        print("Would you like to do another entry? (Y?) : ")
         if (scanner.next().compareTo("Y") != 0)
             again = false
-
     }
 
     scanner.close()
