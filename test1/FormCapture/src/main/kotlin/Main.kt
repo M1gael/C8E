@@ -26,6 +26,7 @@ fun main() {
 //GET
         if (exchange.requestMethod == "GET") {
             if (exchange.requestURI.path == "/" || exchange.requestURI.path == "/index.html") { //prevent double log of filebytes
+
                 //read data from our index and store bytes
                 val inputStream = object {}.javaClass.getResourceAsStream("/index.html")
                 var pageContent = inputStream.bufferedReader().use { it.readText() }
@@ -89,7 +90,7 @@ fun main() {
                     birthday = LocalDate.parse(tempBirthday , dateFormat)
                 }catch (e : Exception){
                     validData = false
-                    invalidReason = "DATE : Correct Format , Invalid Values"
+                    invalidReason = "DATE : Incorrect Format OR Impossible Values"
                 }
             }
 
