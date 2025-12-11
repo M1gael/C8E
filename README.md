@@ -19,3 +19,18 @@ mongod --dbpath dirName
                 └── index.html
 ```
 This is not the complete project structure , only the directories I have worked with , the other directories follow the standard java/kotlin project structure.
+
+
+# T2
+No need for any user interaction to get running as with T1.
+
+
+## Notable Directories
+```txt
+	└── outputs
+       ├── output.csv
+
+	└── database
+       ├── data.db
+```
+Note that these  files do not exist and are automatically created at runtime each time.
