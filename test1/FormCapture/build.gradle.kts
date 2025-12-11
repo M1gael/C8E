@@ -1,5 +1,7 @@
 plugins {
     kotlin("jvm") version "2.2.20"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+    application
 }
 
 group = "org.example"
@@ -15,4 +17,14 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+application {
+    mainClass.set("MainKt")
+}
+
+tasks.shadowJar {
+    archiveBaseName.set("test1-app")
+    archiveClassifier.set("")
+    mergeServiceFiles()
 }

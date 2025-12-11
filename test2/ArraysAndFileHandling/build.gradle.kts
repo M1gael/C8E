@@ -1,5 +1,7 @@
 plugins {
     kotlin("jvm") version "2.2.20"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+    application
 }
 
 group = "org.example"
@@ -18,4 +20,13 @@ tasks.test {
 }
 kotlin {
     jvmToolchain(21)
+}
+
+application {
+    mainClass.set("MainKt")
+}
+
+tasks.shadowJar {
+    archiveBaseName.set("test2-app")
+    archiveClassifier.set("")
 }

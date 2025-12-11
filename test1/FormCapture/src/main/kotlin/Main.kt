@@ -16,7 +16,7 @@ fun main() {
     val server = HttpServer.create(InetSocketAddress(8000),0)
 
     //db connection
-    val mongoClient = MongoClients.create("mongodb://localhost:27017")
+    val mongoClient = MongoClients.create("mongodb://mongo-db:27017") //for local mongodb://localhost:27017
     val database = mongoClient.getDatabase("User_Database")
     val collection = database.getCollection("User")
 
