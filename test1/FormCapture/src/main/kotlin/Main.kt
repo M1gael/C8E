@@ -60,8 +60,8 @@ fun main() {
 
 
             //assign , set sentinal values
-            val name = URLDecoder.decode((params["name"]?.ifBlank { "INVALID" } ?: "INVALID"), "UTF-8").trim().replace( " " , "")
-            val surname = URLDecoder.decode((params["surname"]?.ifBlank { "INVALID" } ?: "INVALID"), "UTF-8").trim().replace( " " , "")
+            val name = URLDecoder.decode((params["name"]?.ifBlank { "INVALID" } ?: "INVALID"), "UTF-8").trim()
+            val surname = URLDecoder.decode((params["surname"]?.ifBlank { "INVALID" } ?: "INVALID"), "UTF-8").trim()
             val idNum = URLDecoder.decode((params["id_number"]?.ifBlank { "INVALID" } ?: "INVALID"), "UTF-8").trim().replace( " " , "")
             var birthday : LocalDate? = null
                 val tempBirthday = URLDecoder.decode(((params["birthday"])?.ifBlank { "INVALID" } ?: "INVALID") , "UTF-8").replace( " " , "")
