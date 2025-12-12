@@ -20,8 +20,7 @@ tasks.test {
 }
 
 application {
-    mainClass.set("MainKt")
-}
+    mainClass.set("org.example.MainKt")}
 
 tasks.shadowJar {
     archiveBaseName.set("test1-app")

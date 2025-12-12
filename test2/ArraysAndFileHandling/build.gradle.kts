@@ -23,8 +23,7 @@ kotlin {
 }
 
 application {
-    mainClass.set("MainKt")
-}
+    mainClass.set("org.example.MainKt")}
 
 tasks.shadowJar {
     archiveBaseName.set("test2-app")

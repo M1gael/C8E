@@ -34,3 +34,16 @@ No need for any user interaction to get running as with T1.
        ├── data.db
 ```
 Note that these  files do not exist and are automatically created at runtime each time.
+
+
+# Run It With Docker
+I have made use of podman to build these containers.
+```shell
+docker-compose up --build
+OR
+podman-compose up --build
+```
+As it stands:
+- test1 should work all by itself. 
+- test2 runs and processes data correctly in memory, however, due to current container volume configurations, the generated CSV outputs and SQLite database file are isolated inside the container and will not appear in the host's project folders.
+- The native IDE run for test2 is fully functional
