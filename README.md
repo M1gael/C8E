@@ -1,14 +1,4 @@
 # T1 
-## Setup
-1. Ensure Mongo is started in the dir containing the database
-```shell
-mongod --dbpath dirName
-```
-
-2. Now run the application via the source code from and IDE , or the jar artifact , assuming you have JDK 21 installed.
-
-3. The HTTP sevrer will be hosted on port `8000` and MongoDB will be hosted on `27017`.
-
 ## Directory Structure
 ```txt
 	└── src
@@ -20,15 +10,9 @@ mongod --dbpath dirName
 ```
 This is not the complete project structure , only the directories I have worked with , the other directories follow the standard java/kotlin project structure.
 
-## Ports
-- MongoDB : `27017`
-- App : `8000`
-
 # T2
-No need for any user interaction to get running as with T1.
-
-
 ## Notable Directories
+The strucure follows the same default paradigm as T1 , except for : 
 ```txt
 	└── outputs
        ├── output.csv
@@ -36,9 +20,8 @@ No need for any user interaction to get running as with T1.
 	└── database
        ├── data.db
 ```
-Note that these files do not exist and are automatically created at runtime each time.
 
-## Ports
+# Ports Used
 - test1 : `8000`
        - MongoDB : '27017'
 - test2 : '8001'
