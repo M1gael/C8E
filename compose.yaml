@@ -10,8 +10,8 @@ services:
     depends_on:
       - mongo-db
     volumes:
-    - ./outputs:/app/outputs:Z
-    - ./database:/app/database:Z
+    - ./test2/outputs:/outputs:Z
+    - ./test2/database:/database:Z
   mongo-db:
     image: mongo:latest
     ports:
