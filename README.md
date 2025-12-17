@@ -23,8 +23,8 @@ The strucure follows the same default paradigm as T1 , except for :
 
 # Ports Used
 - test1 : `8000`
-       - MongoDB : '27017'
-- test2 : '8001'
+       - MongoDB : `27017`
+- test2 : `8001`
 
 
 # Run It 
